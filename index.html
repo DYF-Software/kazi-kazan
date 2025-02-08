@@ -107,7 +107,7 @@
                 const y = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top;
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
-                ctx.arc(x, y, 15, 0, Math.PI * 2);
+                ctx.arc(x, y, 12, 0, Math.PI * 2);
                 ctx.fill();
 
                 const imageData = ctx.getImageData(0, 0, cover.width, cover.height);
@@ -119,10 +119,10 @@
                     }
                 }
                 let clearedPercentage = (transparentPixels / (totalPixels / 4)) * 100;
-                if (clearedPercentage > 50) {
+                if (clearedPercentage > 70) {
                     cover.style.display = 'none';
                     revealedRewards[rewardSrc]++;
-                    setTimeout(checkWinCondition, 500);
+                    checkWinCondition();
                 }
             }
             
@@ -138,12 +138,14 @@
 
         function checkWinCondition() {
             if (gameFinished) return;
+            let totalRevealed = 0;
             for (const type in revealedRewards) {
+                totalRevealed += revealedRewards[type];
                 if (revealedRewards[type] >= 3) {
                     gameFinished = true;
                     const rewardName = rewards[type];
                     document.getElementById('message').innerText = `Kazandın! ${rewardName}`;
-                    alert(`Kazandın! ${rewardName}`);
+                    setTimeout(() => alert(`Kazandın! ${rewardName}`), 300);
                     return;
                 }
             }
