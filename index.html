@@ -90,11 +90,10 @@
             document.getElementById('game-board').appendChild(card);
             
             let isScratching = false;
-            let clearedPixels = 0;
             const totalPixels = cover.width * cover.height;
 
             function startScratching(event) {
-                event.preventDefault(); // Sayfanın kaymasını önle
+                event.preventDefault();
                 isScratching = true;
             }
             function stopScratching() {
@@ -108,7 +107,7 @@
                 const y = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top;
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
-                ctx.arc(x, y, 10, 0, Math.PI * 2);
+                ctx.arc(x, y, 15, 0, Math.PI * 2);
                 ctx.fill();
 
                 const imageData = ctx.getImageData(0, 0, cover.width, cover.height);
@@ -123,7 +122,7 @@
                 if (clearedPercentage > 50) {
                     cover.style.display = 'none';
                     revealedRewards[rewardSrc]++;
-                    setTimeout(() => checkWinCondition(), 300);
+                    setTimeout(checkWinCondition, 500);
                 }
             }
             
@@ -144,7 +143,7 @@
                     gameFinished = true;
                     const rewardName = rewards[type];
                     document.getElementById('message').innerText = `Kazandın! ${rewardName}`;
-                    setTimeout(() => alert(`Kazandın! ${rewardName}`), 100);
+                    alert(`Kazandın! ${rewardName}`);
                     return;
                 }
             }
