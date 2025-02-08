@@ -94,7 +94,7 @@
             let isScratching = false;
             let scratchedArea = 0;
             const totalArea = cover.width * cover.height;
-            const threshold = 0.6; // %60 kazıma oranı
+            const threshold = 0.75; // %75 kazıma oranı artırıldı
             
             function startScratching(e) {
                 isScratching = true;
@@ -108,9 +108,9 @@
                 const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
-                ctx.arc(x, y, 15, 0, Math.PI * 2);
+                ctx.arc(x, y, 10, 0, Math.PI * 2);
                 ctx.fill();
-                scratchedArea += Math.PI * 15 * 15;
+                scratchedArea += Math.PI * 10 * 10;
                 if (scratchedArea / totalArea > threshold) {
                     cover.style.display = 'none';
                     revealedRewards[rewardSrc]++;
