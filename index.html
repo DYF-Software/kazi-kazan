@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Kazı Kazan Oyunu</title>
     <style>
         body {
@@ -12,17 +12,20 @@
             height: 100vh;
             background-color: #f8f8f8;
             flex-direction: column;
+            overflow: hidden;
+            touch-action: none;
         }
         .game-board {
             display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
+            grid-template-columns: repeat(3, minmax(80px, 100px));
+            grid-template-rows: repeat(3, minmax(80px, 100px));
             gap: 10px;
+            touch-action: none;
         }
         .scratch-card {
             position: relative;
-            width: 100px;
-            height: 100px;
+            width: 100%;
+            height: 100%;
             user-select: none;
         }
         .cover {
@@ -33,6 +36,7 @@
             height: 100%;
             cursor: pointer;
             user-select: none;
+            touch-action: none;
         }
         .revealed {
             width: 100%;
@@ -89,7 +93,10 @@
             
             let isScratching = false;
             
-            function startScratching() { isScratching = true; }
+            function startScratching(e) {
+                isScratching = true;
+                e.preventDefault();
+            }
             function stopScratching() { isScratching = false; }
             function scratch(e) {
                 if (!isScratching) return;
@@ -108,9 +115,9 @@
             cover.addEventListener('mousemove', scratch);
             
             // Mobile touch events
-            cover.addEventListener('touchstart', startScratching);
+            cover.addEventListener('touchstart', startScratching, { passive: false });
             cover.addEventListener('touchend', stopScratching);
-            cover.addEventListener('touchmove', scratch);
+            cover.addEventListener('touchmove', scratch, { passive: false });
             
             cover.addEventListener('click', () => {
                 cover.style.display = 'none';
