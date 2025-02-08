@@ -88,20 +88,30 @@
             document.getElementById('game-board').appendChild(card);
             
             let isScratching = false;
-            cover.addEventListener('mousedown', () => isScratching = true);
-            cover.addEventListener('mouseup', () => isScratching = false);
-            cover.addEventListener('mouseleave', () => isScratching = false);
-            cover.addEventListener('mousemove', (e) => {
+            
+            function startScratching() { isScratching = true; }
+            function stopScratching() { isScratching = false; }
+            function scratch(e) {
                 if (!isScratching) return;
                 const rect = cover.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
                 ctx.arc(x, y, 10, 0, Math.PI * 2);
                 ctx.fill();
-            });
-
+            }
+            
+            cover.addEventListener('mousedown', startScratching);
+            cover.addEventListener('mouseup', stopScratching);
+            cover.addEventListener('mouseleave', stopScratching);
+            cover.addEventListener('mousemove', scratch);
+            
+            // Mobile touch events
+            cover.addEventListener('touchstart', startScratching);
+            cover.addEventListener('touchend', stopScratching);
+            cover.addEventListener('touchmove', scratch);
+            
             cover.addEventListener('click', () => {
                 cover.style.display = 'none';
                 revealedRewards[rewardSrc]++;
