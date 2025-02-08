@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kazı Kazan Oyunu</title>
     <style>
         body {
@@ -12,20 +12,17 @@
             height: 100vh;
             background-color: #f8f8f8;
             flex-direction: column;
-            overflow: hidden;
-            touch-action: none;
         }
         .game-board {
             display: grid;
-            grid-template-columns: repeat(3, minmax(80px, 100px));
-            grid-template-rows: repeat(3, minmax(80px, 100px));
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
             gap: 10px;
-            touch-action: none;
         }
         .scratch-card {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 100px;
+            height: 100px;
             user-select: none;
         }
         .cover {
@@ -36,7 +33,6 @@
             height: 100%;
             cursor: pointer;
             user-select: none;
-            touch-action: none;
         }
         .revealed {
             width: 100%;
@@ -92,14 +88,8 @@
             document.getElementById('game-board').appendChild(card);
             
             let isScratching = false;
-            let scratchedArea = 0;
-            const totalArea = cover.width * cover.height;
-            const threshold = 0.75; // %75 kazıma oranı artırıldı
             
-            function startScratching(e) {
-                isScratching = true;
-                e.preventDefault();
-            }
+            function startScratching() { isScratching = true; }
             function stopScratching() { isScratching = false; }
             function scratch(e) {
                 if (!isScratching) return;
@@ -110,12 +100,6 @@
                 ctx.beginPath();
                 ctx.arc(x, y, 10, 0, Math.PI * 2);
                 ctx.fill();
-                scratchedArea += Math.PI * 10 * 10;
-                if (scratchedArea / totalArea > threshold) {
-                    cover.style.display = 'none';
-                    revealedRewards[rewardSrc]++;
-                    checkWinCondition();
-                }
             }
             
             cover.addEventListener('mousedown', startScratching);
@@ -124,12 +108,18 @@
             cover.addEventListener('mousemove', scratch);
             
             // Mobile touch events
-            cover.addEventListener('touchstart', startScratching, { passive: false });
+            cover.addEventListener('touchstart', startScratching);
             cover.addEventListener('touchend', stopScratching);
-            cover.addEventListener('touchmove', scratch, { passive: false });
+            cover.addEventListener('touchmove', scratch);
+            
+            cover.addEventListener('click', () => {
+                cover.style.display = 'none';
+                revealedRewards[rewardSrc]++;
+                setTimeout(() => checkWinCondition(rewardSrc), 300);
+            });
         }
 
-        function checkWinCondition() {
+        function checkWinCondition(winningReward) {
             for (const type in revealedRewards) {
                 if (revealedRewards[type] >= 3) {
                     const rewardName = rewards[type];
