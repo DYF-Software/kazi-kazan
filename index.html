@@ -15,9 +15,10 @@
             overflow: hidden;
         }
         .game-board {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 340px;
             gap: 10px;
         }
         .scratch-card {
@@ -49,6 +50,7 @@
             font-size: 24px;
             font-weight: bold;
             color: green;
+            text-align: center;
         }
     </style>
 </head>
@@ -63,6 +65,7 @@
         };
         let revealedRewards = {"./assets/bronz.png": 0, "./assets/silver.png": 0, "./assets/gold.png": 0};
         let gameFinished = false;
+        let revealedCards = 0;
 
         function createScratchCard() {
             const card = document.createElement('div');
@@ -120,9 +123,13 @@
                 }
                 let clearedPercentage = (transparentPixels / (totalPixels / 4)) * 100;
                 if (clearedPercentage > 70) {
-                    cover.style.display = 'none';
-                    revealedRewards[rewardSrc]++;
-                    checkWinCondition();
+                    if (!cover.dataset.revealed) {
+                        cover.dataset.revealed = true;
+                        revealedCards++;
+                        cover.style.display = 'none';
+                        revealedRewards[rewardSrc]++;
+                        checkWinCondition();
+                    }
                 }
             }
             
@@ -137,10 +144,8 @@
         }
 
         function checkWinCondition() {
-            if (gameFinished) return;
-            let totalRevealed = 0;
+            if (gameFinished || revealedCards < 3) return;
             for (const type in revealedRewards) {
-                totalRevealed += revealedRewards[type];
                 if (revealedRewards[type] >= 3) {
                     gameFinished = true;
                     const rewardName = rewards[type];
