@@ -92,6 +92,9 @@
             document.getElementById('game-board').appendChild(card);
             
             let isScratching = false;
+            let scratchedArea = 0;
+            const totalArea = cover.width * cover.height;
+            const threshold = 0.6; // %60 kazıma oranı
             
             function startScratching(e) {
                 isScratching = true;
@@ -105,8 +108,14 @@
                 const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
-                ctx.arc(x, y, 10, 0, Math.PI * 2);
+                ctx.arc(x, y, 15, 0, Math.PI * 2);
                 ctx.fill();
+                scratchedArea += Math.PI * 15 * 15;
+                if (scratchedArea / totalArea > threshold) {
+                    cover.style.display = 'none';
+                    revealedRewards[rewardSrc]++;
+                    checkWinCondition();
+                }
             }
             
             cover.addEventListener('mousedown', startScratching);
@@ -118,15 +127,9 @@
             cover.addEventListener('touchstart', startScratching, { passive: false });
             cover.addEventListener('touchend', stopScratching);
             cover.addEventListener('touchmove', scratch, { passive: false });
-            
-            cover.addEventListener('click', () => {
-                cover.style.display = 'none';
-                revealedRewards[rewardSrc]++;
-                setTimeout(() => checkWinCondition(rewardSrc), 300);
-            });
         }
 
-        function checkWinCondition(winningReward) {
+        function checkWinCondition() {
             for (const type in revealedRewards) {
                 if (revealedRewards[type] >= 3) {
                     const rewardName = rewards[type];
