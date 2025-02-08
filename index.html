@@ -62,6 +62,7 @@
             "./assets/gold.png": "Gold"
         };
         let revealedRewards = {"./assets/bronz.png": 0, "./assets/silver.png": 0, "./assets/gold.png": 0};
+        let gameFinished = false;
 
         function createScratchCard() {
             const card = document.createElement('div');
@@ -100,7 +101,7 @@
                 isScratching = false;
             }
             function scratch(event) {
-                if (!isScratching) return;
+                if (!isScratching || gameFinished) return;
                 event.preventDefault();
                 const rect = cover.getBoundingClientRect();
                 const x = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left;
@@ -122,7 +123,7 @@
                 if (clearedPercentage > 50) {
                     cover.style.display = 'none';
                     revealedRewards[rewardSrc]++;
-                    setTimeout(() => checkWinCondition(rewardSrc), 300);
+                    setTimeout(() => checkWinCondition(), 300);
                 }
             }
             
@@ -136,12 +137,14 @@
             cover.addEventListener('touchmove', scratch, { passive: false });
         }
 
-        function checkWinCondition(winningReward) {
+        function checkWinCondition() {
+            if (gameFinished) return;
             for (const type in revealedRewards) {
                 if (revealedRewards[type] >= 3) {
+                    gameFinished = true;
                     const rewardName = rewards[type];
                     document.getElementById('message').innerText = `Kazandın! ${rewardName}`;
-                    alert(`Kazandın! ${rewardName}`);
+                    setTimeout(() => alert(`Kazandın! ${rewardName}`), 100);
                     return;
                 }
             }
