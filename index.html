@@ -23,6 +23,7 @@
             position: relative;
             width: 100px;
             height: 100px;
+            user-select: none;
         }
         .cover {
             position: absolute;
@@ -31,11 +32,16 @@
             width: 100%;
             height: 100%;
             cursor: pointer;
+            user-select: none;
         }
         .revealed {
             width: 100%;
             height: 100%;
-            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            user-select: none;
         }
         #message {
             margin-bottom: 20px;
@@ -60,6 +66,12 @@
             const card = document.createElement('div');
             card.classList.add('scratch-card');
             
+            const reward = document.createElement('img');
+            reward.classList.add('revealed');
+            const rewardSrc = Object.keys(rewards)[Math.floor(Math.random() * Object.keys(rewards).length)];
+            reward.src = rewardSrc;
+            card.appendChild(reward);
+            
             const cover = document.createElement('canvas');
             cover.classList.add('cover');
             cover.width = 100;
@@ -71,14 +83,8 @@
             img.onload = function() {
                 ctx.drawImage(img, 0, 0, cover.width, cover.height);
             }
-            
-            const reward = document.createElement('img');
-            reward.classList.add('revealed');
-            const rewardSrc = Object.keys(rewards)[Math.floor(Math.random() * Object.keys(rewards).length)];
-            reward.src = rewardSrc;
-            
-            card.appendChild(reward);
             card.appendChild(cover);
+            
             document.getElementById('game-board').appendChild(card);
             
             let isScratching = false;
@@ -98,7 +104,6 @@
 
             cover.addEventListener('click', () => {
                 cover.style.display = 'none';
-                reward.style.display = 'block';
                 revealedRewards[rewardSrc]++;
                 setTimeout(() => checkWinCondition(rewardSrc), 300);
             });
