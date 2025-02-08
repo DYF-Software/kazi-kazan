@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Kazı Kazan Oyunu</title>
+    <!-- p5.js kütüphanesini CDN üzerinden yüklüyoruz -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+  </head>
+  <body>
+    <script>
+      let bg, coin, cover;   // Resim değişkenleri
+      let coverLayer;        // Kaplama grafiği (kazınacak katman)
+
+      // Resimleri yükle
+      function preload() {
+        bg = loadImage('background.png');
+        coin = loadImage('coin.png');
+        cover = loadImage('cover.png');
+      }
+
+      function setup() {
+        // Canvas boyutunu belirle (örneğin 800x600)
+        createCanvas(800, 600);
+        
+        // coverLayer adında, canvas boyutunda bir grafik oluşturuyoruz.
+        coverLayer = createGraphics(width, height);
+        // Oluşturduğumuz grafik üzerine cover.png'yi çiziyoruz.
+        coverLayer.image(cover, 0, 0, width, height);
+        
+        // İsteğe bağlı: Pürüzsüzleştirmeyi kapatıyoruz (kazıma efektinde daha keskin sonuç için)
+        noSmooth();
+      }
+
+      function draw() {
+        // Arka planı çiz
+        image(bg, 0, 0, width, height);
+        
+        // Coin resmini canvas'ın ortasına yerleştiriyoruz
+        image(coin, width / 2 - coin.width / 2, height / 2 - coin.height / 2);
+        
+        // Kazınacak kaplama katmanını çiziyoruz
+        image(coverLayer, 0, 0);
+      }
+
+      // Fare sürüklenirken, coverLayer üzerinde kazıma işlemi yapıyoruz
+      function mouseDragged() {
+        coverLayer.erase(); // Silme modunu açıyoruz
+        // Fare konumunun etrafında 50x50 piksel boyutunda bir daire siliniyor
+        coverLayer.ellipse(mouseX, mouseY, 50, 50);
+        coverLayer.noErase(); // Silme modunu kapatıyoruz
+      }
+    </script>
+  </body>
+</html>
