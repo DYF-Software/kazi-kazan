@@ -1,54 +1,123 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kazı Kazan Oyunu</title>
-    <!-- p5.js kütüphanesini CDN üzerinden yüklüyoruz -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-  </head>
-  <body>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+            flex-direction: column;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+        }
+        .scratch-card {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+        .cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .revealed {
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+        #message {
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div id="message"></div>
+    <div class="game-board" id="game-board"></div>
     <script>
-      let bg, coin, cover;   // Resim değişkenleri
-      let coverLayer;        // Kaplama grafiği (kazınacak katman)
+        const rewards = {
+            "./assets/bronz.png": "Bronz",
+            "./assets/silver.png": "Silver",
+            "./assets/gold.png": "Gold"
+        };
+        let revealedRewards = {"./assets/bronz.png": 0, "./assets/silver.png": 0, "./assets/gold.png": 0};
 
-      // Resimleri yükle
-      function preload() {
-        bg = loadImage('background.png');
-        coin = loadImage('coin.png');
-        cover = loadImage('cover.png');
-      }
+        function createScratchCard() {
+            const card = document.createElement('div');
+            card.classList.add('scratch-card');
+            
+            const cover = document.createElement('canvas');
+            cover.classList.add('cover');
+            cover.width = 100;
+            cover.height = 100;
+            
+            const ctx = cover.getContext('2d');
+            const img = new Image();
+            img.src = './assets/cover.png';
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, cover.width, cover.height);
+            }
+            
+            const reward = document.createElement('img');
+            reward.classList.add('revealed');
+            const rewardSrc = Object.keys(rewards)[Math.floor(Math.random() * Object.keys(rewards).length)];
+            reward.src = rewardSrc;
+            
+            card.appendChild(reward);
+            card.appendChild(cover);
+            document.getElementById('game-board').appendChild(card);
+            
+            let isScratching = false;
+            cover.addEventListener('mousedown', () => isScratching = true);
+            cover.addEventListener('mouseup', () => isScratching = false);
+            cover.addEventListener('mouseleave', () => isScratching = false);
+            cover.addEventListener('mousemove', (e) => {
+                if (!isScratching) return;
+                const rect = cover.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 10, 0, Math.PI * 2);
+                ctx.fill();
+            });
 
-      function setup() {
-        // Canvas boyutunu belirle (örneğin 800x600)
-        createCanvas(800, 600);
-        
-        // coverLayer adında, canvas boyutunda bir grafik oluşturuyoruz.
-        coverLayer = createGraphics(width, height);
-        // Oluşturduğumuz grafik üzerine cover.png'yi çiziyoruz.
-        coverLayer.image(cover, 0, 0, width, height);
-        
-        // İsteğe bağlı: Pürüzsüzleştirmeyi kapatıyoruz (kazıma efektinde daha keskin sonuç için)
-        noSmooth();
-      }
+            cover.addEventListener('click', () => {
+                cover.style.display = 'none';
+                reward.style.display = 'block';
+                revealedRewards[rewardSrc]++;
+                setTimeout(() => checkWinCondition(rewardSrc), 300);
+            });
+        }
 
-      function draw() {
-        // Arka planı çiz
-        image(bg, 0, 0, width, height);
-        
-        // Coin resmini canvas'ın ortasına yerleştiriyoruz
-        image(coin, width / 2 - coin.width / 2, height / 2 - coin.height / 2);
-        
-        // Kazınacak kaplama katmanını çiziyoruz
-        image(coverLayer, 0, 0);
-      }
+        function checkWinCondition(winningReward) {
+            for (const type in revealedRewards) {
+                if (revealedRewards[type] >= 3) {
+                    const rewardName = rewards[type];
+                    document.getElementById('message').innerText = `Kazandın! ${rewardName}`;
+                    alert(`Kazandın! ${rewardName}`);
+                    return;
+                }
+            }
+        }
 
-      // Fare sürüklenirken, coverLayer üzerinde kazıma işlemi yapıyoruz
-      function mouseDragged() {
-        coverLayer.erase(); // Silme modunu açıyoruz
-        // Fare konumunun etrafında 50x50 piksel boyutunda bir daire siliniyor
-        coverLayer.ellipse(mouseX, mouseY, 50, 50);
-        coverLayer.noErase(); // Silme modunu kapatıyoruz
-      }
+        for (let i = 0; i < 9; i++) {
+            createScratchCard();
+        }
     </script>
-  </body>
+</body>
 </html>
