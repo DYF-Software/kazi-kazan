@@ -12,6 +12,7 @@
             height: 100vh;
             background-color: #f8f8f8;
             flex-direction: column;
+            overflow: hidden;
         }
         .game-board {
             display: grid;
@@ -88,18 +89,41 @@
             document.getElementById('game-board').appendChild(card);
             
             let isScratching = false;
-            
-            function startScratching() { isScratching = true; }
-            function stopScratching() { isScratching = false; }
-            function scratch(e) {
+            let clearedPixels = 0;
+            const totalPixels = cover.width * cover.height;
+
+            function startScratching(event) {
+                event.preventDefault(); // Sayfanın kaymasını önle
+                isScratching = true;
+            }
+            function stopScratching() {
+                isScratching = false;
+            }
+            function scratch(event) {
                 if (!isScratching) return;
+                event.preventDefault();
                 const rect = cover.getBoundingClientRect();
-                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-                const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                const x = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left;
+                const y = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top;
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
                 ctx.arc(x, y, 10, 0, Math.PI * 2);
                 ctx.fill();
+
+                const imageData = ctx.getImageData(0, 0, cover.width, cover.height);
+                let pixels = imageData.data;
+                let transparentPixels = 0;
+                for (let i = 3; i < pixels.length; i += 4) {
+                    if (pixels[i] === 0) {
+                        transparentPixels++;
+                    }
+                }
+                let clearedPercentage = (transparentPixels / (totalPixels / 4)) * 100;
+                if (clearedPercentage > 50) {
+                    cover.style.display = 'none';
+                    revealedRewards[rewardSrc]++;
+                    setTimeout(() => checkWinCondition(rewardSrc), 300);
+                }
             }
             
             cover.addEventListener('mousedown', startScratching);
@@ -107,16 +131,9 @@
             cover.addEventListener('mouseleave', stopScratching);
             cover.addEventListener('mousemove', scratch);
             
-            // Mobile touch events
-            cover.addEventListener('touchstart', startScratching);
+            cover.addEventListener('touchstart', startScratching, { passive: false });
             cover.addEventListener('touchend', stopScratching);
-            cover.addEventListener('touchmove', scratch);
-            
-            cover.addEventListener('click', () => {
-                cover.style.display = 'none';
-                revealedRewards[rewardSrc]++;
-                setTimeout(() => checkWinCondition(rewardSrc), 300);
-            });
+            cover.addEventListener('touchmove', scratch, { passive: false });
         }
 
         function checkWinCondition(winningReward) {
