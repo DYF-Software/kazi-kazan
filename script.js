@@ -24,85 +24,85 @@ const rewardsNames = {
   "./assets/gold.png":   "Gold",
   "./assets/bronz.png":  "Bronz",
   "./assets/silver.png": "Silver",
-  // gold.png tekrar tekrar kullanılmış olsa da basit tutuyoruz
 };
 
 let gameFinished = false;
 let revealedCards = 0;
+let activeCardId = null; // Yalnızca kazınan kartı takip eder
+let isScratching = false; // Kazıma devam ederken başka karta izin vermez
 
 /* --------------------------
    2) OYUN BAŞLATMA (SPLASH)
 --------------------------- */
 document.getElementById("startButton").addEventListener("click", function() {
-  // Splash ekranını gizle
   document.getElementById("splash").style.display = "none";
-  // Oyun ekranını göster
   document.getElementById("gameContainer").style.display = "block";
 
-  // 9 adet (3×3) kart oluştur
   const board = document.getElementById("game-board");
-  board.innerHTML = ""; // (yeniden başlatma amaçlı temiz)
+  board.innerHTML = ""; // Yeniden başlatma için temizle
   for (let i = 0; i < 9; i++) {
-    createScratchCard();
+    createScratchCard(i); // Her karta benzersiz bir kimlik atanıyor
   }
 
-  // Eğer responsive.js'deki handleResize fonksiyonundan 
-  // hemen yararlanmak isterseniz:
   if (typeof handleResize === "function") {
-    handleResize(); 
+    handleResize();
   }
 });
 
 /* --------------------------
    3) KART OLUŞTURMA
 --------------------------- */
-function createScratchCard() {
+function createScratchCard(index) {
   const card = document.createElement("div");
   card.classList.add("scratch-card");
 
-  // Ödül resmi
   const reward = document.createElement("img");
   reward.classList.add("revealed");
   reward.style.visibility = "hidden";
   card.appendChild(reward);
 
-  // Kaplama (canvas)
   const cover = document.createElement("canvas");
   cover.classList.add("cover");
-  // Başlangıçta rasgele bir boyut. (Responsive.js'de güncellenecek.)
   cover.width = 100;
   cover.height = 100;
+  cover.dataset.cardId = index; // **Her karta benzersiz ID ekleniyor**
   card.appendChild(cover);
 
-  // Board'a ekle
   document.getElementById("game-board").appendChild(card);
 
-  // Kaplama resmini çiz
   const ctx = cover.getContext("2d");
   const coverImg = new Image();
   coverImg.src = "./assets/cover.png";
   coverImg.onload = () => {
-    console.log("Kaplama resmi yüklendi!");
     ctx.drawImage(coverImg, 0, 0, cover.width, cover.height);
-    
   };
 
-  // Kazıma ile ilgili
-  let isScratching = false;
-
-  cover.addEventListener("mousedown", startScratching);
+  cover.addEventListener("mousedown", (e) => startScratching(e, cover));
   cover.addEventListener("mouseup", stopScratching);
   cover.addEventListener("mouseleave", stopScratching);
   cover.addEventListener("mousemove", (e) => scratch(e, cover, ctx));
 
-  cover.addEventListener("touchstart", startScratching, { passive: false });
+  cover.addEventListener("touchstart", (e) => startScratching(e, cover), { passive: false });
   cover.addEventListener("touchend", stopScratching);
   cover.addEventListener("touchmove", (e) => scratch(e, cover, ctx), { passive: false });
 
-  function startScratching(e) {
+  function startScratching(e, canvas) {
     e.preventDefault();
     if (gameFinished) return;
-    isScratching = true;
+
+    let cardId = canvas.dataset.cardId;
+    
+    // **Eğer başka bir kart kazınıyorsa ve henüz tamamlanmadıysa yeni kart kazınamaz**
+    if (isScratching && activeCardId !== cardId) {
+      console.log(`Kazıma devam ediyor! Yeni karta geçilemez. Aktif kart: ${activeCardId}`);
+      return;
+    }
+
+    if (!isScratching && (activeCardId == cardId || activeCardId == null)) {
+      console.log(`Kazımaya başlandı! Kart ID: ${cardId}` + activeCardId);
+      activeCardId = cardId;
+      isScratching = true;
+    }
   }
 
   function stopScratching() {
@@ -111,9 +111,10 @@ function createScratchCard() {
 
   function scratch(e, canvas, context) {
     if (!isScratching || gameFinished) return;
+    if (canvas.dataset.cardId !== activeCardId) return; // **Sadece aktif kart kazınabilir!**
+
     e.preventDefault();
 
-    // Koordinatları hesapla
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
@@ -122,13 +123,11 @@ function createScratchCard() {
     const x = pointerX * scaleX;
     const y = pointerY * scaleY;
 
-    // Kazıma
     context.globalCompositeOperation = "destination-out";
     context.beginPath();
     context.arc(x, y, 12, 0, Math.PI * 2);
     context.fill();
 
-    // Kazıma oranı hesapla
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
     let transparentPixels = 0;
@@ -145,12 +144,15 @@ function createScratchCard() {
         revealedCards++;
         let currentReward = revealOrder[nextRewardIndex % revealOrder.length];
         nextRewardIndex++;
-
+        console.log(`Kazıma bitti! Kart ID: ${activeCardId}`);
+        isScratching = false;
+        activeCardId = null; // Kazıma bittiğinde yeni bir kart kazınabilir
         reward.src = currentReward;
         reward.style.visibility = "visible";
         canvas.style.display = "none";
 
         checkWinCondition();
+        stopScratching(); // Kart tamamen kazınınca başka kart kazınabilir!
       }
     }
   }
@@ -161,14 +163,14 @@ function createScratchCard() {
 --------------------------- */
 function checkWinCondition() {
   if (gameFinished || revealedCards < 3) return;
-  
+
   const revealedImgs = document.querySelectorAll(".revealed");
   const counts = {};
   revealOrder.forEach(r => counts[r] = 0);
 
   revealedImgs.forEach(img => {
     if (img.style.visibility === "visible") {
-      const srcName = img.src.split("/").pop(); // gold.png vs
+      const srcName = img.src.split("/").pop();
       const fullPath = "./assets/" + srcName;
       if (counts[fullPath] !== undefined) {
         counts[fullPath]++;
