@@ -82,7 +82,9 @@ function createScratchCard() {
   const coverImg = new Image();
   coverImg.src = "./assets/cover.png";
   coverImg.onload = () => {
+    console.log("Kaplama resmi yüklendi!");
     ctx.drawImage(coverImg, 0, 0, cover.width, cover.height);
+    
   };
 
   // Kazıma ile ilgili
