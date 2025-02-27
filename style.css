@@ -1,0 +1,133 @@
+/* Genel Stil Ayarları */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f8f8;
+  /* Eğer dikey/horizontal kaydırma istemezseniz açabilirsiniz (ancak çok küçük ekranda sorun yaratabilir)
+     overflow: hidden; */
+}
+
+/* Splash Ekranı */
+#splash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Pastel Gradient */
+  background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  z-index: 10;
+  text-align: center;
+}
+
+#splash h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+#splash p {
+  font-size: 24px;
+  margin-bottom: 30px;
+}
+
+#splash button {
+  padding: 10px 20px;
+  font-size: 20px;
+  background: #ffd55c;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+#wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 98%;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+
+
+
+
+
+
+/* Mesaj Alanı */
+#message {
+  font-size: 32px;
+  color: #444;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+/* 
+   Oyun Alanı (3x3 sabit düzen, ekrana göre ölçeklenir)
+   - width/height = 80vmin, yani ekranın kısa kenarının %80'i kadardır.
+   - 3 sütun x 3 satır sabit tutulur.
+*/
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 90vmin; /* Küçük ekranlar için %80 yerine %90 kullan */
+  height: 90vmin;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  padding: 10px; /* Daha dar padding */
+  box-sizing: border-box;
+  gap: 5px; /* Kartların birbirine yapışmasını önlemek için boşluk */
+}
+
+
+/* Kazı Kazan Kartları (grid hücresi boyutuna adapte) */
+.scratch-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  
+  border: 2px solid #ddd;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.scratch-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+/* Kaplama (Canvas) */
+.cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Canvas gerçek boyutu JS tarafında (cover.width / cover.height) ayarlanır */
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Ödül Resmi */
+.revealed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}

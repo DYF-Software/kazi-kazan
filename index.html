@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kazı Kazan Oyunu</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Splash (Açılış) Ekranı -->
+  <div id="splash">
+    <img src="./assets/intro.png"></img>
+    <h1>Kazı Kazan Oyunu</h1>
+    <p>Üç Tane Aynı Coini Bul Büyük Ödülü Kazan.</p>
+    <button id="startButton">Oyuna Başla</button>
+  </div>
+
+  <!-- Oyun Ekranı -->
+   <div id="wrapper">
+    <div id="gameContainer">
+      <div id="message"></div>
+      <div class="game-board" id="game-board"></div>
+    </div>
+   </div>
+<!-- Kupon Kazanma Pop-up'ı -->
+<div id="couponPopup" style="display: none; justify-content: center; align-items: center;
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8);
+    color: white; font-size: 24px; flex-direction: column; text-align: center; animation: fadeIn 0.5s ease-in-out;">
+    
+    <h1 style="font-size: 32px; font-weight: bold; text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.5);">
+        🎉 Kupon Kazandınız! 🎉
+    </h1>
+    <p style="font-size: 20px; margin-bottom: 15px;">Aşağıdaki kodu kullanarak ödülünüzü alın:</p>
+    
+    <div id="couponCode" onclick="copyCoupon()" 
+        style="padding: 15px; background: white; color: black; font-size: 26px; 
+        font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s;">
+        DEMO100
+    </div>
+    
+    <p id="copyMessage" style="color: limegreen; font-size: 18px; margin-top: 10px; display: none;">
+        ✔ Kupon kopyalandı!
+    </p>
+    
+    <button onclick="location.reload()" style="padding: 12px 24px; font-size: 20px; cursor: pointer; 
+        margin-top: 20px; background: linear-gradient(45deg, #4caf50, #2e7d32); 
+        color: white; border: none; border-radius: 10px; transition: 0.3s ease-in-out;">
+        Tekrar Oyna
+    </button>
+</div>
+
+
+  <!-- Kütüphane veya ekstra efekt yok -->
+  <script src="script.js" defer></script>
+</body>
+</html>
